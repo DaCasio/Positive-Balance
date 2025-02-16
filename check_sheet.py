@@ -32,9 +32,14 @@ def parse_month(month_str):
     return date(int(year), month_map[month], 1)
 
 if positive_index is not None:
-    positive_date = parse_month(months[positive_index])
-    current_date = date.today()
-    delta = positive_date - current_date
+    # Testen Sie mit einem zukünftigen Datum
+     positive_date = date(2025, 6, 1)  # Beispiel: 1. Juni 2025
+     current_date = date.today()
+     delta = positive_date - current_date
+
+     #positive_date = parse_month(months[positive_index])
+     #current_date = date.today()
+     #delta = positive_date - current_date
 
     # Berechne die Anzahl der Monate und Tage
     if delta.days < 0:
