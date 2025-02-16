@@ -15,7 +15,6 @@ lines = response.text.splitlines()
 reader = csv.reader(lines)
 data = list(reader)
 
-# Überprüfe, ob mindestens zwei Zeilen (Header und Daten) geladen wurden
 if len(data) < 2:
     print("Fehler: Es wurden nicht genügend Zeilen aus dem CSV geladen.")
     exit(1)
@@ -29,7 +28,7 @@ positive_index = next((i for i, bal in enumerate(balances) if not bal.startswith
 
 def parse_month(month_str):
     """
-    Wandelt einen Monatsstring, z.B. "Jun25", in ein date-Objekt um.
+    Wandelt einen Monatsstring, z.B. "Aug25", in ein date-Objekt um.
     Ist das Jahr nur zweistellig, wird "20" vorangestellt.
     """
     month_part = month_str[:3]
@@ -48,13 +47,9 @@ if positive_index is not None:
     current_date = date.today()
     delta = positive_date - current_date
 
-    if delta.days < 0:
-        months_count = 0
-        days_count = 0
-    else:
-        # Zähle den ersten Monat mit
-        months_count = (delta.days // 30) + 1  
-        days_count = delta.days % 30
+    # Hier erfolgt die Berechnung ohne +1: z. B. 166 Tage ergeben 5 Monate (166 // 30) und 16 Tage (166 % 30)
+    months_count = delta.days // 30   
+    days_count = delta.days % 30        
 
     result = {
         "frames": [
