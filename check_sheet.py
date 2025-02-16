@@ -39,8 +39,8 @@ def parse_month(month_str):
     month_part = month_str[:3]
     year_part = month_str[3:]
     if len(year_part) != 2:
-        raise ValueError("Jahreszahl im Monatstring stimmt nicht: " + month_str)
-    year_full = "20" + year_part
+        raise ValueError("Ungültiger Jahres-Teil im Monat: " + month_str)
+    year_full = int("20" + year_part)
     month_map = {
         'Jan': 1,
         'Feb': 2,
@@ -57,41 +57,44 @@ def parse_month(month_str):
     }
     if month_part not in month_map:
         raise ValueError("Unbekannter Monatsname: " + month_part)
-    return date(int(year_full), month_map[month_part], 1)
+    return date(year_full, month_map[month_part], 1)
 
-def calculate_months_and_days(start_date, end_date):
+def add_months(orig_date, months):
     """
-    Berechnet die exakten Monate und Tage zwischen zwei Daten.
+    Addiert eine bestimmte Anzahl von Monaten zu orig_date.
+    Falls der Tag im Zielmonat nicht existiert, wird der letzte gültige Tag gewählt.
     """
-    months_count = 0
-    current_date = start_date
+    new_month = orig_date.month - 1 + months
+    new_year = orig_date.year + new_month // 12
+    new_month = new_month % 12 + 1
+    new_day = orig_date.day
+    max_day = monthrange(new_year, new_month)[1]
+    if new_day > max_day:
+        new_day = max_day
+    return date(new_year, new_month, new_day)
 
-    while current_date < end_date:
-        # Anzahl der Tage im aktuellen Monat ermitteln
-        days_in_month = monthrange(current_date.year, current_date.month)[1]
-        
-        # Prüfen, ob das Enddatum im aktuellen Monat liegt
-        if current_date.year == end_date.year and current_date.month == end_date.month:
-            days_count = (end_date - current_date).days
-            return months_count, days_count
-        
-        # Zum nächsten Monat wechseln
-        current_date = date(
-            current_date.year + (current_date.month // 12),
-            (current_date.month % 12) + 1,
-            1
-        )
-        
-        months_count += 1
+def calculate_months_and_days_exact(start_date, end_date):
+    """
+    Berechnet die exakten vollen Monate und verbleibenden Tage zwischen zwei Daten.
+    Beispiel: Vom 16.02.2025 bis 01.12.2025 sollten 9 Monate und 15 Tage resultieren.
+    """
+    # Gesamtdifferenz in Monaten (ohne Berücksichtigung der Tage)
+    total_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
+    # Falls der Tag von start_date größer ist als der Tag von end_date, ist noch kein voller Monat vergangen.
+    if start_date.day > end_date.day:
+        total_months -= 1
+    anchor_date = add_months(start_date, total_months)
+    days_remainder = (end_date - anchor_date).days
+    return total_months, days_remainder
 
-# Berechne das Datum des ersten positiven Monats
+# Berechne das Datum des ersten positiven Monats (z. B. "Dez25") 
 positive_date = parse_month(months[positive_index])
 current_date = date.today()
 
-if positive_date < current_date:
+if positive_date <= current_date:
     months_count, days_count = 0, 0
 else:
-    months_count, days_count = calculate_months_and_days(current_date, positive_date)
+    months_count, days_count = calculate_months_and_days_exact(current_date, positive_date)
 
 result = {
     "frames": [
