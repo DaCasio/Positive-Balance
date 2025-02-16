@@ -39,4 +39,4 @@ if positive_index is not None:
     with open("output_lametric.json", "w") as json_file:
         json.dump(result, json_file, indent=4)
 else:
-    print("No posi
+    print("No positive balance found.")
