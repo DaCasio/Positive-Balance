@@ -37,10 +37,6 @@ if positive_index is not None:
     delta = positive_date - current_date
 
     # Berechne die Anzahl der Monate und Tage
-    months_count = delta.days // 30
-    days_count = delta.days % 30
-
-    # Anpassung: Berechne die Anzahl der Monate und Tage korrekt
     if delta.days < 0:
         months_count = 0
         days_count = 0
