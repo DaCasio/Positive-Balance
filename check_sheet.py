@@ -2,6 +2,7 @@ from datetime import date
 import json
 import requests
 import csv
+from calendar import monthrange
 
 # Google Sheet URL (CSV Export Link)
 sheet_url = "https://docs.google.com/spreadsheets/d/1syH5ntimv_5juHGOZo0LUgLO1Jk2kEQjhno8Kl21jzw/export?format=csv&gid=0"
@@ -58,17 +59,39 @@ def parse_month(month_str):
         raise ValueError("Unbekannter Monatsname: " + month_part)
     return date(int(year_full), month_map[month_part], 1)
 
+def calculate_months_and_days(start_date, end_date):
+    """
+    Berechnet die exakten Monate und Tage zwischen zwei Daten.
+    """
+    months_count = 0
+    current_date = start_date
+
+    while current_date < end_date:
+        # Anzahl der Tage im aktuellen Monat ermitteln
+        days_in_month = monthrange(current_date.year, current_date.month)[1]
+        
+        # Prüfen, ob das Enddatum im aktuellen Monat liegt
+        if current_date.year == end_date.year and current_date.month == end_date.month:
+            days_count = (end_date - current_date).days
+            return months_count, days_count
+        
+        # Zum nächsten Monat wechseln
+        current_date = date(
+            current_date.year + (current_date.month // 12),
+            (current_date.month % 12) + 1,
+            1
+        )
+        
+        months_count += 1
+
 # Berechne das Datum des ersten positiven Monats
 positive_date = parse_month(months[positive_index])
 current_date = date.today()
-delta = positive_date - current_date
 
-if delta.days < 0:
-    months_count = 0
-    days_count = 0
+if positive_date < current_date:
+    months_count, days_count = 0, 0
 else:
-    months_count = delta.days // 30
-    days_count = delta.days % 30
+    months_count, days_count = calculate_months_and_days(current_date, positive_date)
 
 result = {
     "frames": [
