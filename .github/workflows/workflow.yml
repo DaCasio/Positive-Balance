@@ -3,6 +3,7 @@ name: Check Google Sheet for Positive Balance
 on:
   schedule:
     - cron: '0 6-21 * * *' # Jede Stunde von 6 bis 22 Uhr MEZ
+  workflow_dispatch: # Ermöglicht manuelle Ausführung
 
 jobs:
   check-sheet:
