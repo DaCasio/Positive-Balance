@@ -40,6 +40,14 @@ if positive_index is not None:
     months_count = delta.days // 30
     days_count = delta.days % 30
 
+    # Anpassung: Berechne die Anzahl der Monate und Tage korrekt
+    if delta.days < 0:
+        months_count = 0
+        days_count = 0
+    else:
+        months_count = delta.days // 30
+        days_count = delta.days % 30
+
     result = {
         "frames": [
             {
