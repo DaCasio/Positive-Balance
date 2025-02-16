@@ -23,12 +23,20 @@ positive_index = next((i for i, balance in enumerate(balances) if not balance.st
 
 if positive_index is not None:
     result = {
-        "month": months[positive_index],
-        "balance": balances[positive_index]
+        "frames": [
+            {
+                "text": months[positive_index],
+                "icon": "i100"
+            },
+            {
+                "text": balances[positive_index],
+                "icon": "i101"
+            }
+        ]
     }
 
     # Write the result to a JSON file
-    with open("output.json", "w") as json_file:
+    with open("output_lametric.json", "w") as json_file:
         json.dump(result, json_file, indent=4)
 else:
-    print("No positive balance found.")
+    print("No posi
