@@ -1,32 +1,34 @@
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+import requests
+import csv
 import json
-import os
 
-# Google Sheets API Zugangsdaten
-scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('path/to/your/credentials.json', scope)
-client = gspread.authorize(creds)
+# Google Sheet URL (CSV Export Link)
+sheet_url = "https://docs.google.com/spreadsheets/d/1syH5ntimv_5juHGOZo0LUgLO1Jk2kEQjhno8Kl21jzw/export?format=csv&gid=0"
 
-# URL und GID aus Umgebungsvariablen holen
-sheet_url = os.environ.get('GOOGLE_SHEET_URL')
-sheet_gid = os.environ.get('GOOGLE_SHEET_GID')
+# Download the CSV data
+response = requests.get(sheet_url)
+response.raise_for_status()
 
-# Google Sheet öffnen
-sheet = client.open_by_url(sheet_url).get_worksheet_by_gid(int(sheet_gid))
+# Parse the CSV data
+lines = response.text.splitlines()
+reader = csv.reader(lines)
+data = list(reader)
 
-# Daten aus Zeile 2 holen
-data = sheet.row_values(2)
+# Extract the first row (months) and second row (balances)
+months = data[0]
+balances = data[1]
 
-# Erste positive Zahl finden
-positive_balance_index = next((i for i, x in enumerate(data) if not x.startswith('-')), None)
+# Find the first positive balance
+positive_index = next((i for i, balance in enumerate(balances) if not balance.startswith('-')), None)
 
-if positive_balance_index is not None:
-    month = sheet.cell(1, positive_balance_index + 1).value
-    balance = data[positive_balance_index]
-    
-    # JSON Datei erstellen
-    with open('output.json', 'w') as json_file:
-        json.dump({"month": month, "balance": balance}, json_file)
+if positive_index is not None:
+    result = {
+        "month": months[positive_index],
+        "balance": balances[positive_index]
+    }
+
+    # Write the result to a JSON file
+    with open("output.json", "w") as json_file:
+        json.dump(result, json_file, indent=4)
 else:
-    print("Kein positives Guthaben gefunden.")
+    print("No positive balance found.")
