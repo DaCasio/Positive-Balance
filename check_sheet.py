@@ -29,16 +29,17 @@ positive_index = next((i for i, bal in enumerate(balances) if not bal.startswith
 
 def parse_month(month_str):
     """
-    Wandelt einen Monatsstring z. B. "Jun25" in ein Date-Objekt um.
-    Falls year nur aus zwei Ziffern besteht (z. B. "25"), wird 20 vorangestellt.
+    Wandelt einen Monatsstring, z.B. "Jun25", in ein Date-Objekt um.
+    Ist das Jahr nur zweistellig, wird '20' vorangestellt.
     """
     month_part = month_str[:3]
     year_part = month_str[3:]
     if len(year_part) == 2:
         year_part = "20" + year_part
     month_map = {
-        'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-        'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
+        'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4,
+        'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8,
+        'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
     }
     return date(int(year_part), month_map[month_part], 1)
 
@@ -47,12 +48,12 @@ if positive_index is not None:
     current_date = date.today()
     delta = positive_date - current_date
 
+    # Berechne Monate und Tage zwischen dem heutigen Datum und dem positiven Datum
     if delta.days < 0:
         months_count = 0
         days_count = 0
     else:
-        # Den ersten Monat mitzählen, daher wird +1 gerechnet
-        months_count = (delta.days // 30) + 1  
+        months_count = (delta.days // 30) + 1  # +1, da der erste Monat mitzählt
         days_count = delta.days % 30
 
     result = {
