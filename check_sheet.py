@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 import json
 import requests
 import csv
@@ -6,7 +6,7 @@ import csv
 # Google Sheet URL (CSV Export Link)
 sheet_url = "https://docs.google.com/spreadsheets/d/1syH5ntimv_5juHGOZo0LUgLO1Jk2kEQjhno8Kl21jzw/export?format=csv&gid=0"
 
-# Download the CSV-Daten
+# Download der CSV-Daten
 response = requests.get(sheet_url)
 response.raise_for_status()
 
@@ -15,43 +15,55 @@ lines = response.text.splitlines()
 reader = csv.reader(lines)
 data = list(reader)
 
-# Erste Zeile (Monate) und zweite Zeile (Kontostände) extrahieren
+# Überprüfe, ob mindestens zwei Zeilen (Header und Daten) geladen wurden
+if len(data) < 2:
+    print("Fehler: Es wurden nicht genügend Zeilen aus dem CSV geladen.")
+    exit(1)
+
+# Extrahiere die erste Zeile (Monate) und die zweite Zeile (Balances)
 months = data[0]
 balances = data[1]
 
-# Finde die erste positive Balance (ohne führendes Minus)
-positive_index = next((i for i, balance in enumerate(balances) if not balance.startswith('-')), None)
+# Finde den Index der ersten positiven Balance (Zelle, die NICHT mit '-' beginnt)
+positive_index = next((i for i, bal in enumerate(balances) if not bal.startswith('-')), None)
 
 def parse_month(month_str):
-    month, year = month_str[:3], month_str[3:]
+    """
+    Wandelt einen Monatsstring z. B. "Jun25" in ein Date-Objekt um.
+    Falls year nur aus zwei Ziffern besteht (z. B. "25"), wird 20 vorangestellt.
+    """
+    month_part = month_str[:3]
+    year_part = month_str[3:]
+    if len(year_part) == 2:
+        year_part = "20" + year_part
     month_map = {
         'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
         'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
     }
-    return date(int(year), month_map[month], 1)
+    return date(int(year_part), month_map[month_part], 1)
 
 if positive_index is not None:
     positive_date = parse_month(months[positive_index])
     current_date = date.today()
     delta = positive_date - current_date
 
-    # Berechne Monate und Tage
     if delta.days < 0:
         months_count = 0
         days_count = 0
     else:
-        months_count = (delta.days // 30) + 1  # +1, da der erste Monat mitzählt
+        # Den ersten Monat mitzählen, daher wird +1 gerechnet
+        months_count = (delta.days // 30) + 1  
         days_count = delta.days % 30
 
     result = {
         "frames": [
             {
                 "text": f"M{months_count} T{days_count}",
-                "icon": "i11386"
+                "icon": "i11386"  # Icon-ID für den Zeitraum
             },
             {
                 "text": balances[positive_index],
-                "icon": "i66330"
+                "icon": "i66330"  # Icon-ID für den Kontostand
             }
         ]
     }
