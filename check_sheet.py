@@ -24,48 +24,65 @@ months = data[0]
 balances = data[1]
 
 # Finde den Index der ersten positiven Balance (Zelle, die NICHT mit '-' beginnt)
-positive_index = next((i for i, bal in enumerate(balances) if not bal.startswith('-')), None)
+positive_index = next((i for i, bal in enumerate(balances) if bal and not bal.startswith('-')), None)
+
+if positive_index is None:
+    print("Kein positiver Balance-Wert gefunden.")
+    exit(0)
 
 def parse_month(month_str):
     """
-    Wandelt einen Monatsstring, z.B. "Aug25", in ein date-Objekt um.
-    Ist das Jahr nur zweistellig, wird "20" vorangestellt.
+    Wandelt einen Monatsstring, z.B. "Jan25", in ein date-Objekt um.
+    Es wird davon ausgegangen, dass der Monatsname immer dreistellig und die Jahreszahl immer zweistellig ist.
     """
     month_part = month_str[:3]
     year_part = month_str[3:]
-    if len(year_part) == 2:
-        year_part = "20" + year_part
+    if len(year_part) != 2:
+        raise ValueError("Jahreszahl im Monatstring stimmt nicht: " + month_str)
+    year_full = "20" + year_part
     month_map = {
-        'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4,
-        'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8,
-        'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
+        'Jan': 1,
+        'Feb': 2,
+        'Mär': 3,
+        'Apr': 4,
+        'Mai': 5,
+        'Jun': 6,
+        'Jul': 7,
+        'Aug': 8,
+        'Sep': 9,
+        'Okt': 10,
+        'Nov': 11,
+        'Dez': 12,
     }
-    return date(int(year_part), month_map[month_part], 1)
+    if month_part not in month_map:
+        raise ValueError("Unbekannter Monatsname: " + month_part)
+    return date(int(year_full), month_map[month_part], 1)
 
-if positive_index is not None:
-    positive_date = parse_month(months[positive_index])
-    current_date = date.today()
-    delta = positive_date - current_date
+# Berechne das Datum des ersten positiven Monats
+positive_date = parse_month(months[positive_index])
+current_date = date.today()
+delta = positive_date - current_date
 
-    # Hier erfolgt die Berechnung ohne +1: z. B. 166 Tage ergeben 5 Monate (166 // 30) und 16 Tage (166 % 30)
-    months_count = delta.days // 30   
-    days_count = delta.days % 30        
-
-    result = {
-        "frames": [
-            {
-                "text": f"M{months_count} T{days_count}",
-                "icon": "i11386"  # Icon-ID für den Zeitraum
-            },
-            {
-                "text": balances[positive_index],
-                "icon": "i66330"  # Icon-ID für den Kontostand
-            }
-        ]
-    }
-
-    # Schreibe das Ergebnis in die JSON-Datei
-    with open("output_lametric.json", "w") as json_file:
-        json.dump(result, json_file, indent=4)
+if delta.days < 0:
+    months_count = 0
+    days_count = 0
 else:
-    print("No positive balance found.")
+    months_count = delta.days // 30
+    days_count = delta.days % 30
+
+result = {
+    "frames": [
+        {
+            "text": f"M{months_count} T{days_count}",
+            "icon": "i11386"
+        },
+        {
+            "text": balances[positive_index],
+            "icon": "i66330"
+        }
+    ]
+}
+
+# Schreibe das Ergebnis in die JSON-Datei output_lametric.json
+with open("output_lametric.json", "w") as json_file:
+    json.dump(result, json_file, indent=4)
