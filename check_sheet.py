@@ -1,5 +1,5 @@
-import requests
-import csv
+from datetime import date, timedelta
+from decimal import Decimal, ROUNDDOWN, getcontext
 import json
 
 # Google Sheet URL (CSV Export Link)
@@ -21,11 +21,27 @@ balances = data[1]
 # Find the first positive balance
 positive_index = next((i for i, balance in enumerate(balances) if not balance.startswith('-')), None)
 
+def parse_month(month_str):
+    month, year = month_str[:3], month_str[3:]
+    month_map = {
+        'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
+        'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
+    }
+    return date(int(year), month_map[month], 1)
+
 if positive_index is not None:
+    positive_date = parse_month(months[positive_index])
+    current_date = date.today()
+    delta = positive_date - current_date
+
+    # Berechne die Anzahl der Monate und Tage
+    months_count = delta.days // 30
+    days_count = delta.days % 30
+
     result = {
         "frames": [
             {
-                "text": months[positive_index],
+                "text": f"M{months_count} T{days_count}",
                 "icon": "i11386"  # Icon ID für den Monat
             },
             {
