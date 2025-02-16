@@ -26,11 +26,11 @@ if positive_index is not None:
         "frames": [
             {
                 "text": months[positive_index],
-                "icon": "i100"
+                "icon": "i11386"  # Icon ID für den Monat
             },
             {
                 "text": balances[positive_index],
-                "icon": "i101"
+                "icon": "i66330"  # Icon ID für den Wert
             }
         ]
     }
