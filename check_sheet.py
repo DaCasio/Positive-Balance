@@ -41,7 +41,8 @@ if positive_index is not None:
         months_count = 0
         days_count = 0
     else:
-        months_count = delta.days // 30
+        # Berechne die Anzahl der Monate
+        months_count = (delta.days // 30) + 1  # +1, da der erste Monat auch zählt
         days_count = delta.days % 30
 
     result = {
