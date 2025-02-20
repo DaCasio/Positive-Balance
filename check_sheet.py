@@ -100,11 +100,11 @@ result = {
     "frames": [
         {
             "text": f"M{months_count} T{days_count}",
-            "icon": "i11386"
+            "icon": "11386"
         },
         {
             "text": balances[positive_index],
-            "icon": "i66330"
+            "icon": "66330"
         }
     ]
 }
