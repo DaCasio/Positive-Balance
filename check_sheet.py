@@ -11,6 +11,9 @@ sheet_url = "https://docs.google.com/spreadsheets/d/1syH5ntimv_5juHGOZo0LUgLO1Jk
 response = requests.get(sheet_url)
 response.raise_for_status()
 
+# WICHTIG: Explizit UTF-8 Encoding setzen, bevor response.text verwendet wird
+response.encoding = 'utf-8'
+
 # CSV-Daten parsen
 lines = response.text.splitlines()
 reader = csv.reader(lines)
